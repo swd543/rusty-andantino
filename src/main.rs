@@ -292,6 +292,39 @@ impl Hex{
         }
     }
 
+    fn minimax_parallel(&self, depth:i8, maximising:bool)->i32{
+        if self.is_game || depth==0{
+            return self.eval();
+        }
+        println!("Here {}",depth);
+        let mut children=Box::new(Vec::new());
+        {
+            let moves=self.get_possible_moves();
+            println!("Possible moves {:?}",moves);
+            for m in 0..moves.len(){
+                children.push(self.clone());
+                children[m].move_game(moves[m]);
+                children[m].check_win(moves[m]);
+            }
+        }
+        if maximising{
+            let mut score=std::i32::MIN;
+            for c in 0..children.len(){
+                let value= children[c].minimax(depth-1,false);
+                if value>score {score=value}
+            }
+            return score;
+        }
+        else{
+            let mut score=std::i32::MAX;
+            for c in 0..children.len(){
+                let value=children[c].minimax(depth-1,true);
+                if value<score {score=value}
+            }
+            return score;
+        }
+    }
+
     fn get_possible_moves(&self)->Vec<Havannah>{
         let mut moves =Vec::new();
         self.all_positions_do(|_i,_j,v|{v>1 && v<BLACK as GameStateType}, |i,j,_k|{

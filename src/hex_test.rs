@@ -124,6 +124,7 @@ fn test_can_exit2() {
 }
 
 #[test]
+#[ignore]
 fn test_recursive_overflow() {
     let mut game=Hex::new(3000);
     let move1=Havannah{x:game.side as isize, y:game.side as isize};
@@ -133,6 +134,7 @@ fn test_recursive_overflow() {
 }
 
 #[test]
+#[ignore]
 fn test_minimax() {
     let mut game=Hex::new(10);
     let mut move1=Havannah{x:game.side as isize, y:game.side as isize};
@@ -145,5 +147,22 @@ fn test_minimax() {
         }
     }
     game.hexify();
-    game.minimax(4,true);
+    game.minimax(3,true);
+}
+
+#[test]
+fn test_thread() {
+    let mut children = vec![];
+
+    for i in 0..10 {
+        children.push(thread::spawn(move || {
+            println!("this is thread number {}", i);
+            return i;
+        }));
+    }
+    let mut results=vec![];
+    for child in children {
+        results.push(child.join());
+    }
+    println!("{:?}",results);
 }
