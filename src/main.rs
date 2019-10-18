@@ -200,7 +200,7 @@ impl Hex{
             if v==INVALID as GameStateType{
                 return true;
             }
-            if v==player as GameStateType && !visited.contains(location.borrow()) || !(v==BLACK as GameStateType || v==WHITE as GameStateType){
+            if (v==player as GameStateType || !(v==BLACK as GameStateType || v==WHITE as GameStateType)) && !visited.contains(m.borrow()) {
                 return self.can_exit_helper(m, player, visited);
             }
         }
