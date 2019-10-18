@@ -1,10 +1,9 @@
+use std::{io, thread};
 use std::borrow::{Borrow, BorrowMut};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
-use std::{io, thread};
 use std::process::exit;
-use std::sync::Mutex;
 
 use crate::GameState::{BLACK, INVALID, NONE, WHITE};
 
@@ -296,29 +295,46 @@ impl Hex{
         if self.is_game || depth==0{
             return self.eval();
         }
-        println!("Here {}",depth);
-        let mut children=Box::new(Vec::new());
-        {
-            let moves=self.get_possible_moves();
-            println!("Possible moves {:?}",moves);
-            for m in 0..moves.len(){
-                children.push(self.clone());
-                children[m].move_game(moves[m]);
-                children[m].check_win(moves[m]);
-            }
+        let mut children=Vec::new();
+        let moves=self.get_possible_moves();
+        for m in 0..moves.len(){
+            children.push(self.clone());
+            children[m].move_game(moves[m]);
+            children[m].check_win(moves[m]);
         }
         if maximising{
             let mut score=std::i32::MIN;
-            for c in 0..children.len(){
-                let value= children[c].minimax(depth-1,false);
+            let mut threads=vec![];
+            for c in children{
+                threads.push(thread::Builder::new()
+                    .name(format!("min-{}",depth))
+                    .spawn(move||c.minimax_parallel(depth-1,false))
+                    .unwrap());
+            }
+            let mut results=vec![];
+            for t in threads{
+                results.push(t.join());
+            }
+            for r in results{
+                let value=r.unwrap_or_default();
                 if value>score {score=value}
             }
             return score;
-        }
-        else{
+        } else{
             let mut score=std::i32::MAX;
-            for c in 0..children.len(){
-                let value=children[c].minimax(depth-1,true);
+            let mut threads=vec![];
+            for c in children{
+                threads.push(thread::Builder::new()
+                    .name(format!("max-{}",depth))
+                    .spawn(move||c.minimax_parallel(depth-1,true))
+                    .unwrap());
+            }
+            let mut results=vec![];
+            for t in threads{
+                results.push(t.join());
+            }
+            for r in results{
+                let value=r.unwrap_or_default();
                 if value<score {score=value}
             }
             return score;

@@ -116,7 +116,7 @@ fn test_can_exit2() {
     }
     for i in 0..4{
         let y=start.fused_multiply_add(NORTHEAST, i);
-        game.neighbours_do(y, |x|{
+        game.neighbours_do(y, |_x|{
             WHITE as GameStateType
         });
     }
@@ -134,23 +134,23 @@ fn test_recursive_overflow() {
 }
 
 #[test]
-#[ignore]
 fn test_minimax() {
     let mut game=Hex::new(10);
     let mut move1=Havannah{x:game.side as isize, y:game.side as isize};
     let move_sequence =[WEST,NORTHEAST];
     game.move_game(move1);
-    for i in 0..2{
+    for _i in 0..2{
         for j in 0..move_sequence.len(){
             move1=move1.add(move_sequence[j]);
             game.move_game(move1);
         }
     }
     game.hexify();
-    game.minimax(3,true);
+    game.minimax_parallel(4,true);
 }
 
 #[test]
+#[ignore]
 fn test_thread() {
     let mut children = vec![];
 
