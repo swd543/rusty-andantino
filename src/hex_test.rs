@@ -124,7 +124,26 @@ fn test_can_exit2() {
 }
 
 #[test]
-fn test_min_max() {
-    let x=std::i32::MIN;
-    println!("{}",x);
+fn test_recursive_overflow() {
+    let mut game=Hex::new(3000);
+    let move1=Havannah{x:game.side as isize, y:game.side as isize};
+    game.move_game(move1);
+    game.neighbours_do(move1,|_x|WHITE as GameStateType);
+    game.check_win(move1);
+}
+
+#[test]
+fn test_minimax() {
+    let mut game=Hex::new(10);
+    let mut move1=Havannah{x:game.side as isize, y:game.side as isize};
+    let move_sequence =[WEST,NORTHEAST];
+    game.move_game(move1);
+    for i in 0..2{
+        for j in 0..move_sequence.len(){
+            move1=move1.add(move_sequence[j]);
+            game.move_game(move1);
+        }
+    }
+    game.hexify();
+    game.minimax(4,true);
 }

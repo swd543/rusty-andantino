@@ -2,7 +2,7 @@ use std::borrow::{Borrow, BorrowMut};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
-use std::io;
+use std::{io, thread};
 use std::process::exit;
 use std::sync::Mutex;
 
@@ -43,6 +43,7 @@ struct Havannah{
     x:isize,
     y:isize
 }
+
 impl Havannah{
     fn add(&self, b:Havannah )->Havannah{
         Havannah{x:self.x+b.x, y:self.y+b.y}
@@ -240,7 +241,7 @@ impl Hex{
         self.is_game
     }
 
-    fn all_positions_do<Filter,F>(&self, filter:Filter, function:F) where Filter:Fn(usize, usize, GameStateType)->bool, F:Fn(usize, usize, GameStateType){
+    fn all_positions_do<Filter,F>(&self, filter:Filter, mut function:F) where Filter:Fn(usize, usize, GameStateType)->bool, F:FnMut(usize, usize, GameStateType){
         for i in 0..self.size{
             for j in 0..self.size{
                 if filter(i,j,self.board[i][j]){
@@ -252,31 +253,31 @@ impl Hex{
     // ----------------------------- AI stuff below -----------------------
 
     fn eval(&self)->i32{
-        if self.winner.unwrap()==BLACK {return -1}
+        if self.winner.is_none() {return 0}
+        else if self.winner.unwrap()==BLACK {return -1}
         else if self.winner.unwrap()==WHITE {return 1}
         0
     }
 
     fn minimax(&self, depth:i8, maximising:bool)->i32{
-        println!("Here, {}",depth);
         if self.is_game || depth==0{
             return self.eval();
         }
-        println!("2");
-        let mut children=Vec::new();
+        println!("Here {}",depth);
+        let mut children=Box::new(Vec::new());
         {
             let moves=self.get_possible_moves();
+            println!("Possible moves {:?}",moves);
             for m in 0..moves.len(){
                 children.push(self.clone());
                 children[m].move_game(moves[m]);
+                children[m].check_win(moves[m]);
             }
         }
-        println!("3 {:?}",children);
         if maximising{
             let mut score=std::i32::MIN;
             for c in 0..children.len(){
                 let value=children[c].minimax(depth-1,false);
-                println!(" maxi {}",value);
                 if value>score {score=value}
             }
             return score;
@@ -285,7 +286,6 @@ impl Hex{
             let mut score=std::i32::MAX;
             for c in 0..children.len(){
                 let value=children[c].minimax(depth-1,true);
-                println!(" mini {}",value);
                 if value<score {score=value}
             }
             return score;
@@ -297,7 +297,7 @@ impl Hex{
         self.all_positions_do(|_i,_j,v|{v>1 && v<BLACK as GameStateType}, |i,j,_k|{
             moves.push(Havannah{x:i as isize, y:j as isize});
         });
-        moves
+        moves.to_vec()
     }
 }
 
@@ -305,43 +305,53 @@ fn is_occupied(location:&GameStateType) ->bool{
     *location==WHITE as GameStateType || *location==BLACK as GameStateType || *location==INVALID as GameStateType
 }
 
-fn main() {
-    let mut game =Hex::new(10);
+fn run(){
+    let mut game =Box::new(Hex::new(10));
     let start=Havannah{x:game.side as isize,y:game.side as isize};
     game.move_game(start);
     game.move_game(start.add(WEST));
     loop{
-        game.hexify();
+        game.display();
         {
-            println!("{}",game.minimax(5, game.player==WHITE));
+            println!("{}",game.minimax(4, game.player==WHITE));
         }
-//        let moves=game.get_possible_moves();
-//        {
-//            println!("{:?}",moves.lock().unwrap());
-//        }
-//        {
-//            loop{
-//                println!("Enter yo option, mate : ");
-//                let mut x = String::with_capacity(3);
-//                io::stdin().read_line(&mut x).expect("Error reading input");
-//                let x:usize = x.trim().parse().expect("Error parsing number");
-//                if x>=moves.lock().unwrap().len(){
-//                    println!("Try again.");
-//                    continue;
-//                }
-//                let k=moves.lock().unwrap()[x];
-//                println!("You entered {} ---> {:?}",x,k);
-//                game.move_game(k);
-//                if game.check_win(k){
-//                    game.hexify();
-//                    println!("{:?} won!", game.winner.unwrap());
-//                    exit(0);
-//                } else {
-//                    break;
-//                }
-//            }
-//        }
+        let moves=game.get_possible_moves();
+        println!("{:?}",moves);
+        {
+            loop{
+                println!("Enter yo option, mate : ");
+                let mut x = String::with_capacity(3);
+                io::stdin().read_line(&mut x).expect("Error reading input");
+                let x:usize = x.trim().parse().expect("Error parsing number");
+                if x>=moves.len(){
+                    println!("Try again.");
+                    continue;
+                }
+                let k=moves[x];
+                println!("You entered {} ---> {:?}",x,k);
+                game.move_game(k);
+                if game.check_win(k){
+                    game.hexify();
+                    println!("{:?} won!", game.winner);
+                    exit(0);
+                } else {
+                    break;
+                }
+            }
+        }
     }
+}
+
+fn main() {
+    const STACK_SIZE:usize=1024*1024*2;
+    let child = thread::Builder::new()
+        .stack_size(STACK_SIZE)
+        .spawn(run)
+        .unwrap();
+
+    // Wait for thread to join
+    child.join().unwrap();
+    run();
 }
 // Test cases hooked here
 mod hex_test;
