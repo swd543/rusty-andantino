@@ -7,7 +7,7 @@ use crate::havannah::Havannah;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::borrow::Borrow;
-use crate::game_state_type::GameState::INVALID;
+use crate::game_state_type::GameState::{INVALID, BLACK, WHITE};
 
 pub fn visualize(a:Vec<Vec<GameStateType>>){
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
@@ -75,8 +75,14 @@ impl Hex{
                 write!(&mut stdout, "   ");
             }
             for v in vec {
-                let color=(v%256-128) as u8;
-                stdout.set_color(ColorSpec::new().set_bg(Some(Color::Rgb(color,color,color))).set_intense(false).set_fg(Some(Color::Red)));
+                if v==BLACK as i16{
+                    stdout.set_color(ColorSpec::new().set_bg(Some(Color::Rgb(0,0,0))).set_intense(false).set_fg(Some(Color::Red)));
+                } else if v==WHITE as i16{
+                    stdout.set_color(ColorSpec::new().set_bg(Some(Color::Rgb(255,255,255))).set_intense(false).set_fg(Some(Color::Red)));
+                } else{
+                    let mut color=((v%8)*16-130) as u8;
+                    stdout.set_color(ColorSpec::new().set_bg(Some(Color::Rgb(color,color,color))).set_intense(false).set_fg(Some(Color::Red)));
+                }
                 write!(&mut stdout, " {:04} ",v);
             }
             stdout.reset();

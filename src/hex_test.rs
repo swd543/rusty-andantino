@@ -143,7 +143,6 @@ fn test_recursive_overflow() {
 }
 
 #[test]
-#[ignore]
 fn test_minimax() {
     let mut game=Hex::new(10);
     let mut move1=Havannah{x:game.side as isize, y:game.side as isize};

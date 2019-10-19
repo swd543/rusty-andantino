@@ -1,7 +1,7 @@
 use crate::hex::Hex;
 use crate::{convolution, visualisation};
 use std::borrow::Borrow;
-use crate::game_state_type::GameState::INVALID;
+use crate::game_state_type::GameState::{INVALID, WHITE, BLACK};
 use crate::game_state_type::GameStateType;
 use crate::havannah::{EAST, SOUTHEAST, Havannah, SOUTHWEST};
 
@@ -44,8 +44,9 @@ fn test_filter(){
 fn test_conv2(){
     let mut game=Hex::new(10);
     game.move_repeated(3, [EAST,SOUTHWEST].to_vec().borrow(), Havannah{x:3,y:3});
+    game.display();
     let mut arr=game.board.clone();
-    convolution::filter(arr.as_mut(),|x|x==INVALID as GameStateType);
+    convolution::filter(arr.as_mut(),|x|x==INVALID as GameStateType || x!=WHITE as GameStateType && x!=BLACK as GameStateType);
     visualisation::visualize_with_values(&arr);
     let kernel=
         [
