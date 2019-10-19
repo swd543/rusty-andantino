@@ -1,4 +1,8 @@
 use super::*;
+use crate::game_state_type::GameState::*;
+use crate::game_state_type::GameStateType;
+use crate::havannah::*;
+use std::thread;
 
 #[test]
 fn test_init() {
@@ -56,21 +60,21 @@ fn test_check_line() {
     for i in 0..5{
         game.board[i][i]=BLACK as GameStateType;
     }
-    assert!(game.check_line(Havannah{x:0,y:0}));
-    assert!(game.check_line(Havannah{x:2,y:2}));
-    assert!(game.check_line(Havannah{x:4,y:4}));
+    assert!(game.check_line(Havannah{x:0,y:0}).0);
+    assert!(game.check_line(Havannah{x:2,y:2}).0);
+    assert!(game.check_line(Havannah{x:4,y:4}).0);
 
     game.board[4][4]=NONE as GameStateType;
-    assert!(!game.check_line(Havannah{x:0,y:0}));
-    assert!(!game.check_line(Havannah{x:2,y:2}));
-    assert!(!game.check_line(Havannah{x:3,y:3}));
+    assert!(!game.check_line(Havannah{x:0,y:0}).0);
+    assert!(!game.check_line(Havannah{x:2,y:2}).0);
+    assert!(!game.check_line(Havannah{x:3,y:3}).0);
 
     for i in 0..5{
         game.board[game.side-1][i]=WHITE as GameStateType;
     }
-    assert!(game.check_line(Havannah{x:9,y:0}));
+    assert!(game.check_line(Havannah{x:9,y:0}).0);
     game.board[9][4]=BLACK as GameStateType;
-    assert!(!game.check_line(Havannah{x:9,y:0}));
+    assert!(!game.check_line(Havannah{x:9,y:0}).0);
 //    game.hexify();
 }
 
@@ -146,7 +150,7 @@ fn test_minimax() {
         }
     }
     game.hexify();
-    game.minimax_parallel(4,true);
+    println!("{}",game.minimax(8,true));
 }
 
 #[test]
