@@ -3,6 +3,7 @@ use crate::game_state_type::GameState::*;
 use crate::game_state_type::GameStateType;
 use crate::havannah::*;
 use std::thread;
+use arrayfire::{convolve2_sep, ConvMode, ConvDomain, Array, Dim4, print};
 
 #[test]
 fn test_init() {
@@ -172,4 +173,30 @@ fn test_thread() {
         results.push(child.join());
     }
     println!("{:?}",results);
+}
+
+fn test_conv(){
+    let arr=Hex::new(10).board;
+    let kernel=[[1;3];3];
+    let k_center_x=kernel.len()/2;
+    let k_center_y=kernel[0].len()/2;
+    let out=arr.clone();
+
+    for i in 0..arr.len(){
+        for j in 0..arr.len(){
+            for m in 0..kernel.len(){
+                let mm=kernel;
+                for n in 0..kernel[0].len(){
+                    let nn=kernel.len()-1-n;
+                    let ii = i + (kCenterY - mm);
+                    let jj = j + (kCenterX - nn);
+                    if ii >= 0 && ii < rows && jj >= 0 && jj < cols {
+                        out[i][j] += arr[ii][jj] * kernel[mm][nn];
+                    }
+                }
+            }
+        }
+    }
+
+    println!("{:?}",out);
 }
