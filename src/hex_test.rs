@@ -149,8 +149,11 @@ fn test_minimax() {
             game.move_game(move1);
         }
     }
+    game.move_game(move1.add(WEST));
     game.hexify();
-    println!("{}",game.minimax(8,true));
+    let endgame=game.minimax(5,game.player==WHITE);
+    println!("Value possible : {}, moves : {:?}", endgame.0, endgame.1.move_chain);
+    endgame.1.hexify();
 }
 
 #[test]

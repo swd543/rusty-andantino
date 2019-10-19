@@ -21,7 +21,7 @@ fn run(){
     loop{
         game.display();
         {
-            println!("{}",game.minimax(4, game.player==WHITE));
+            println!("{}",game.minimax(4, game.player==WHITE).0);
         }
         let moves=game.get_possible_moves();
         println!("{:?}",moves);

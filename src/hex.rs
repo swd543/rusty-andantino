@@ -18,7 +18,8 @@ pub struct Hex{
     pub count:u64,
     pub player:GameState,
     pub is_game:bool,
-    pub winner:Option<GameState>
+    pub winner:Option<GameState>,
+    pub move_chain:Vec<Havannah>
 }
 
 impl Hex{
@@ -31,7 +32,8 @@ impl Hex{
             count:0,
             player:BLACK,
             is_game:false,
-            winner:None
+            winner:None,
+            move_chain:vec![]
         };
         for _ in 0..x.size{
             let mut v=Vec::new();
@@ -108,6 +110,8 @@ impl Hex{
         self.get_do(coordinates, |_x| p as GameStateType);
         self.neighbours_do(coordinates,|x| x+1);
         self.flip_player();
+        self.count+=1;
+        self.move_chain.push(coordinates);
     }
 
     pub fn flip_player(&mut self){
@@ -135,7 +139,6 @@ impl Hex{
                 self.get( k.fused_multiply_add(*pair[1],end))==player{
                 end+=1;
             }
-            println!("{} -> {}",player,start+end);
             let run_length=start+end;
             if run_length>5{
                 return (true,GameState::from_game(*player),run_length);

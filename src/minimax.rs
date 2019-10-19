@@ -1,14 +1,14 @@
 use crate::hex::Hex;
 use std::thread;
+use crate::havannah::Havannah;
+use std::borrow::Borrow;
 
 impl Hex{
-
-    pub fn minimax(&self, depth:i8, maximising:bool)->i32{
+    pub fn minimax(&self, depth:i8, maximising:bool)->(i32,Hex){
         if self.is_game || depth==0{
-            println!("winner:{}",self.eval());
-            return self.eval();
+            return (self.eval(),self.clone());
         }
-        println!("Searching at depth {}",depth);
+//        println!("Searching at depth {}",depth);
         let mut children=vec![];
         let moves=self.get_possible_moves();
         for m in moves{
@@ -19,19 +19,21 @@ impl Hex{
         }
         if maximising{
             let mut score=std::i32::MIN;
+            let mut optimal=self.clone();
             for c in children{
-                let value=c.minimax(depth-1,false);
-                if value>score {score=value}
+                let (value,pointer)=c.minimax(depth-1,false);
+                if value>score  {score=value; optimal=pointer}
             }
-            return score;
+            return (score, optimal);
         }
         else{
             let mut score=std::i32::MAX;
+            let mut optimal=self.clone();
             for c in children{
-                let value=c.minimax(depth-1,true);
-                if value<score {score=value}
+                let (value,pointer)=c.minimax(depth-1,true);
+                if value<score {score=value; optimal=pointer}
             }
-            return score;
+            return (score, optimal);
         }
     }
 
