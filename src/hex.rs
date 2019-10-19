@@ -24,7 +24,6 @@ pub struct Hex{
 
 impl Hex{
     pub fn new(side:usize)->Hex{
-        println!("Initializing new game...");
         let mut x=Hex{
             side,
             size:2*side+1,
@@ -48,41 +47,9 @@ impl Hex{
                 x.board[x.size-i-1][x.size-j-1]=NONE as GameStateType;
             }
         }
-        println!("Initialized new game!");
         x
     }
 
-    #[allow(dead_code)]
-    pub fn display(&self){
-        let mut hasher=DefaultHasher::new();
-        self.hash(&mut hasher);
-        println!("Game at {:p} ==> hash:{:x} size:{} side:{}, winner:{:?}, is_game:{}, player:{:?}, board:",self,hasher.finish(), self.size, self.side, self.winner, self.is_game, self.player,);
-        for i in 0..self.board.len(){
-            println!("{}\t{:?}",i, self.board[i])
-        }
-    }
-
-
-    #[allow(dead_code)]
-    pub fn hexify(&self){
-        let mut hasher=DefaultHasher::new();
-        self.hash(&mut hasher);
-        println!("Game at {:p} ==> hash:{:x} size:{} side:{}, winner:{:?}, is_game:{}, player:{:?}, board:",self,hasher.finish(), self.size, self.side, self.winner, self.is_game, self.player,);
-        for i in 0..=self.side{
-            for _j in 0..self.side-i{
-                print!(" ");
-            }
-            let slice=self.board[i][0..self.side+i+1].borrow();
-            println!("{:?}",slice);
-        }
-        for i in (self.side+1..=self.size-1).rev(){
-            for _j in 0..self.size-i{
-                print!("  ");
-            }
-            let slice=self.board[self.size-i+self.side][self.size-i .. self.size].borrow();
-            println!("{:?}",slice);
-        }
-    }
 
     pub fn get(&self, location:Havannah) ->&GameStateType{
         &self.board[location.x as usize][location.y as usize]

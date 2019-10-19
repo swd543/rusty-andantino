@@ -9,9 +9,10 @@ use std::io;
 mod havannah;
 mod hex;
 mod game_state_type;
-mod hex_test;
 mod evaluation;
 mod minimax;
+mod visualisation;
+mod convolution;
 
 fn run(){
     let mut game =Box::new(Hex::new(10));
@@ -53,3 +54,7 @@ fn run(){
 fn main() {
     run();
 }
+
+mod hex_test;
+mod convolution_test;
+mod hex_util;
