@@ -3,7 +3,7 @@ use std::hash::{Hash, Hasher};
 use crate::havannah::{Havannah, NEIGHBOURS, NEIGHBOUR_OPP};
 use std::collections::hash_map::DefaultHasher;
 use std::borrow::{Borrow, BorrowMut};
-use std::collections::HashSet;
+use std::collections::{HashSet, HashMap};
 use std::thread;
 use crate::game_state_type::{GameStateType, GameState};
 use crate::game_state_type::GameState::{NONE, INVALID, WHITE, BLACK};
@@ -205,17 +205,13 @@ impl Hex{
             childen_with_eval.push((c.eval(),c));
         }
         childen_with_eval.sort_by(|a,b|{
-            if !max{
+            if max{
                 // Ascending
                 return a.0.partial_cmp(b.0.borrow()).unwrap();
             }
             // Descending
             return b.0.partial_cmp(a.0.borrow()).unwrap();
         });
-//        for i in 0..childen_with_eval.len(){
-//            print!("{} ", childen_with_eval[i].0);
-//        }
-//        println!();
         childen_with_eval
     }
 }
