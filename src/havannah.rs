@@ -1,7 +1,15 @@
-#[derive(Debug, PartialEq, Copy, Clone, Hash, Eq)]
+use std::fmt;
+
+#[derive(PartialEq, Copy, Clone, Hash, Eq)]
 pub struct Havannah{
     pub x:isize,
     pub y:isize
+}
+
+impl fmt::Debug for Havannah {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "P{{{}{}}}", std::char::from_u32(('A' as isize + self.x) as u32).unwrap(), self.y)
+    }
 }
 
 impl Havannah{

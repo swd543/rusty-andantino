@@ -8,6 +8,8 @@ use std::io::{stdout, Write};
 use super::*;
 use termcolor::{StandardStream, ColorSpec, WriteColor, Color, ColorChoice};
 use std::borrow::Borrow;
+use crate::evaluation::KERNEL;
+use crate::visualisation::visualize_with_values;
 
 #[test]
 fn test_init() {
@@ -148,7 +150,7 @@ fn test_minimax() {
     let mut move1=Havannah{x:game.side as isize, y:game.side as isize};
     let move_sequence =[WEST,NORTHEAST];
     game.move_game(move1);
-    for _i in 0..2{
+    for _i in 0..1{
         for j in 0..move_sequence.len(){
             move1=move1.add(move_sequence[j]);
             game.move_game(move1);
@@ -156,9 +158,19 @@ fn test_minimax() {
     }
     game.move_game(move1.add(WEST));
     game.hexify();
-    let endgame=game.minimax(5,game.player==WHITE);
-    println!("Value possible : {}, moves : {:?}", endgame.0, endgame.1.move_chain);
-    endgame.1.hexify();
+    let ser_endgame =game.minimax(5, game.player==WHITE);
+    println!("Value possible, serial : {}, moves : {:?}", ser_endgame.0, ser_endgame.1.move_chain);
+    ser_endgame.1.hexify();
+
+    let par_endgame =game.minimax_parallel(5, game.player==WHITE, 2);
+    println!("Value possible, parallel : {}, moves : {:?}", par_endgame.0, par_endgame.1.move_chain);
+    par_endgame.1.hexify();
+
+    let y=convolution::conv_arr(par_endgame.1.board.borrow(), KERNEL.borrow());
+    visualize_with_values(&y);
+
+    assert_eq!(par_endgame.0, ser_endgame.0);
+    assert_eq!(par_endgame.1.move_chain, ser_endgame.1.move_chain);
 }
 
 #[test]

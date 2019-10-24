@@ -41,9 +41,10 @@ fn test_filter(){
 }
 
 #[test]
+#[ignore]
 fn test_conv2(){
     let mut game=Hex::new(10);
-    game.move_repeated(3, [EAST,SOUTHWEST].to_vec().borrow(), Havannah{x:3,y:3});
+    game.move_repeated(1, [EAST,SOUTHWEST].to_vec().borrow(), Havannah{x:3,y:3});
     game.display();
     let mut arr=game.board.clone();
     convolution::filter(arr.as_mut(),|x|x==INVALID as GameStateType || x!=WHITE as GameStateType && x!=BLACK as GameStateType);

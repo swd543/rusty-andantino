@@ -19,7 +19,7 @@ pub struct Hex{
     pub player:GameState,
     pub is_game:bool,
     pub winner:Option<GameState>,
-    pub move_chain:Vec<Havannah>
+    pub move_chain:Vec<Havannah>,
 }
 
 impl Hex{
@@ -180,13 +180,46 @@ impl Hex{
 
     pub fn get_possible_moves(&self)->Vec<Havannah>{
         let mut moves =vec![];
-        self.all_positions_do(|_i,_j,v|{v>1 && v<BLACK as GameStateType || v==1 && self.count==1}, |i,j,_k|{
+        self.all_positions_do(|_i,_j,v|{v>1 && v<=6 as GameStateType || v==1 && self.count==1}, |i,j,_k|{
             moves.push(Havannah{x:i as isize, y:j as isize});
         });
         moves.to_vec()
     }
+
+    pub fn get_children(&self)->Vec<Hex>{
+        let mut children=vec![];
+        let moves=self.get_possible_moves();
+        for m in moves{
+            let mut cloned=self.clone();
+            cloned.move_game(m);
+            cloned.check_win(m);
+            children.push(cloned);
+        }
+        children
+    }
+
+    pub fn get_sorted_children(&self, max:bool)->Vec<(i32,Hex)>{
+        let mut children=self.get_children();
+        let mut childen_with_eval=vec![];
+        for c in children{
+            childen_with_eval.push((c.eval(),c));
+        }
+        childen_with_eval.sort_by(|a,b|{
+            if !max{
+                // Ascending
+                return a.0.partial_cmp(b.0.borrow()).unwrap();
+            }
+            // Descending
+            return b.0.partial_cmp(a.0.borrow()).unwrap();
+        });
+//        for i in 0..childen_with_eval.len(){
+//            print!("{} ", childen_with_eval[i].0);
+//        }
+//        println!();
+        childen_with_eval
+    }
 }
 
-fn is_occupied(location:&GameStateType) ->bool{
+pub fn is_occupied(location:&GameStateType) ->bool{
     *location==WHITE as GameStateType || *location==BLACK as GameStateType || *location==INVALID as GameStateType
 }
